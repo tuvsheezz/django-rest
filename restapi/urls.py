@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
 router.register(r'api/posts', views.PostViewSet)
+router.register(r'api/postfiles', views.PostFileViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

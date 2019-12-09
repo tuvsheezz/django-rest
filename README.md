@@ -1,10 +1,13 @@
 ## Django-rest-framework turshsan temdeglel
 
+Ene udaad olon zurag/file-tai post oruulj boldog bolgoy.
+
 ### Clone hiigeed ajilluulah gej baigaa bol
 
 ```
 $ git clone ...
 $ cd restapi
+$ git checkout uploadmultiimage
 $ pip install requirements.txt
 $ python manage.py makemigrations
 $ python manage.py migrate
@@ -13,137 +16,19 @@ $ python manage.py runserver
 
 ### Esvel daraah alhamuudaar shineer uusgej bolomjtoi
 
-#### Step 0 Suulgasan baisan (minii ashigladag)
-- python3
-- pip3 (sudo apt get install -y python3-pip)
-- virtualenv (pip3 install virtualenv)
-- tree (sudo apt install tree) (project-iin structure-g oilgomjtoi harahad zugeer)
-- sqlite3 (RDBMS)
-
-#### Step 1 Zarim 1 ym hum hiih
-Hussen gazraa (folder-uudiin neriig duraarai uguurei)
-
-```sh
-$ mkdir djangorest-test && cd djangorest-test
-$ virtualenv -p python3 env
-$ source env/bin/activate
-$ mkdir restapi && cd restapi
-$ pip install django djangorestframework django-cors-headers Pillow
-
+#### Step 0
+Hervee oilgomjgui baival ```master``` branch-g checkout hiigeed turshij uzeerei.
 ```
-
-#### Step 2 Shine django rest project uusgeh
-```sh
-$ django-admin startproject restapi .
+$ git clone ...
 $ cd restapi
-$ tree
-```
-tree-iin ur dun
-```
-.
-├── manage.py
-└── restapi
-    ├── __init__.py
-    ├── settings.py
-    ├── urls.py
-    └── wsgi.py
+$ git checkout master
 ```
 
-#### Step 3 Project-n settings.py-g uurchluh
+#### Step 1 Model uusgeh
 
-Daraagiin 2 muriig INSTALLED_APPS-d nemne.
-```
-INSTALLED_APPS = [
-    ...,
-    'rest_framework',
-    'corsheaders',
-]
-```
-Daraagiin 1 muriig MIDDLEWARE-d nemne
-```
-MIDDLEWARE = [
-    ...,
-    'corsheaders.middleware.CorsMiddleware',
-]
-```
-Haana n ch ym 1 gazar n daraahiig nemne. Yvaandaa file ntr oruulj ntr bolhod zoriulaad cors media path ntr zarlaad baigaa ym hereggui bol cors suulgahgui media tohiruulahgui bj bolno.
-```
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-```
+Yunii umnu modeloo uurchlunu. post-file modeloo nemeed post modeloo uurchlunu.
+post/models.py-d daraah hesgiig nemne.
 
-#### Step 4 Migrate hiih
-
-```
-$ python manage.py makemigrations
-$ python manage.py migrate
-```
-admin, auth, contenttypes, sessions-iin migrate-uud orno.
-
-migrate hiisnii daraa db.sqlite3 gesen file uusne. (DB)
-
-```sh
-$ sqlite3 db.sqlite3
-sqlite3> .header on
-sqlite3> .mode column
-sqlite3> .tables
-```
-
-DB-ee neegeed header mode tohirgoo hiigeed (arai oilgomjtoi haragdah uchraas ) table list-g n harahad daraah baidaltai bolson baina.
-
-```
-auth_group                  django_admin_log          
-auth_group_permissions      django_content_type       
-auth_permission             django_migrations         
-auth_user                   django_session            
-auth_user_groups            auth_user_user_permissions                 
-```
-sqlite3-aas garahdaa .q
-
-Super user ntr uusgej boldog l ym shig baina. Daraa n sudlaad oruulna.
-```sh
-python manage.py createsuperuser --email admin@example.com --username admin
-```
-
-#### Step 5 Shine app uusgeh
-```sh
-$ django-admin startapp post
-$ tree
-```
-tree-iin ur dun.
-```
-.
-├── manage.py
-├── post
-│   ├── admin.py
-│   ├── apps.py
-│   ├── __init__.py
-│   ├── migrations
-│   │   └── __init__.py
-│   ├── models.py
-│   ├── tests.py
-│   └── views.py
-├── README.md
-└── restapi
-    ├── __init__.py
-    ├── settings.py
-    ├── urls.py
-    └── wsgi.py
-
-```
-
-#### Step 6 Shine app-aa settings.py-d burtgeh
-```
-INSTALLED_APPS = [
-    ...,
-    'post',
-]
-```
-
-
-#### Step 7 Model class uusgeh
-
-post/models.py-d modeloo nemne.
 ```
 from django.db import models
 
@@ -152,159 +37,146 @@ from django.db import models
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
-    image = models.ImageField(upload_to='post_images')
 
     def __str__(self):
         return self.title
+
+class PostFile(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='post_files', blank=True)
 ```
 
-post/admin.py-d modeloo burtgene. Daraah 2 muriig nemhed l bolh bololtoi.
+#### Step 2 admin.py-d burtgeh
 
+post/admin.py
 ```
-from .models import Post
+from django.contrib import admin
+from .models import Post, PostFile
+
+# Register your models here.
+
 admin.site.register(Post)
+admin.site.register(PostFile)
 ```
 
-#### Step 8 Migrate hiih
+#### Step 3 Serializer uurchluh
 
-```
-$ python manage.py makemigrations post
-$ python manage.py migrate post
-```
-
-Commanduudiig ariin post baihgui bsn ch bolno. ingej bichvel tuhain app-n migrations-g uusgeh, migrate hiih bolomjtoi ym baina.
-
-sqlite3-aar db.sqlite3-g shalgahad daraah baidaltai buyu post_post gesn table nemegdsen baina.
-```
-auth_group                  django_admin_log          
-auth_group_permissions      django_content_type       
-auth_permission             django_migrations         
-auth_user                   django_session            
-auth_user_groups            post_post                 
-auth_user_user_permissions
-```
-
-```
-sqlite3>pragma table_info('post_post');
-
-```
-table-iin butets info-g harahad
-```
-cid         name        type        notnull     dflt_value  pk        
-----------  ----------  ----------  ----------  ----------  ----------
-0           id          integer     1                       1         
-1           title       varchar(10  1                       0         
-2           content     text        1                       0         
-3           image       varchar(10  1                       0         
-```
-modeld bichsenii daguu uusgegdsen baih ystoi ntr hahaha.
-(esvel zugeer ```.schema post_post``` gesen ch bolno.)
-
-Project-iin structure n daraah baidaltai bolson baina
-
-```
-.
-├── db.sqlite3
-├── manage.py
-├── post
-│   ├── admin.py
-│   ├── apps.py
-│   ├── __init__.py
-│   ├── migrations
-│   │   ├── 0001_initial.py
-│   │   ├── __init__.py
-│   │   └── __pycache__
-│   │       ├── 0001_initial.cpython-37.pyc
-│   │       └── __init__.cpython-37.pyc
-│   ├── models.py
-│   ├── __pycache__
-│   │   ├── admin.cpython-37.pyc
-│   │   ├── __init__.cpython-37.pyc
-│   │   └── models.cpython-37.pyc
-│   ├── serializers.py
-│   ├── tests.py
-│   └── views.py
-├── README.md
-└── restapi
-    ├── __init__.py
-    ├── __pycache__
-    │   ├── __init__.cpython-37.pyc
-    │   ├── settings.cpython-37.pyc
-    │   └── urls.cpython-37.pyc
-    ├── settings.py
-    ├── urls.py
-    └── wsgi.py
-
-```
-post-iin migration folder uuseed dotor n migrationuud n file helbereer baina. orood harj bolno.
-
-#### Step 9 Model serializer uusgeh
-
-```sh
-$ touch post/serializers.py
-```
-post app-d serializers.py gesn file uusgeed daraah code-g oruulna.
-
+post/serializers.py
 ```
 from rest_framework import serializers
-from .models import Post
+from .models import Post, PostFile
+
+class PostFileSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = PostFile
+        fields = ['id', 'file', 'post_id']
+
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
+    files = PostFileSerializer(source='postfile_set', many=True, read_only=True)
+
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'image']
+        fields = ['id', 'title', 'content', 'files']
+
+    def create(self, validated_data):
+        files_data = self.context.get('view').request.FILES
+        post = Post.objects.create(title=validated_data.get('title'),content=validated_data.get('content'))
+        for file_data in files_data.values():
+            PostFile.objects.create(post=post, file=file_data)
+        return post
 ```
 
-#### Step 10 ViewSet
+#### Step 4 ViewSet
+
+Daraah uurchlultuudiig nemne
 ```
-from .models import Post
+from .models import Post, PostFile
 from rest_framework import viewsets
-from .serializers import PostSerializer
+from .serializers import PostSerializer, PostFileSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-```
-
-#### Step 11 url-ee burtgeh
-
-restapi/urls.py-d url burtgene daraah baidaltai bolno.
+class PostFileViewSet(viewsets.ModelViewSet):
+    queryset = PostFile.objects.all()
+    serializer_class = PostFileSerializer
 
 ```
-from django.urls import include, path
-from rest_framework import routers
-from post import views
-from django.conf import settings
-from django.conf.urls.static import static
+#### Step 5 Route nemeh
 
+project-iin urls.py buyu ene tohioldold restapi/urls.py-d daraah muriig nemne
+```
+...
 router = routers.DefaultRouter()
 router.register(r'api/posts', views.PostViewSet)
-
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browsable API.
-urlpatterns = [
-    path('', include(router.urls)),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+router.register(r'api/postfiles', views.PostFileViewSet) # ene muriig nemsen
+...
 
 ```
 
-Post maani image-tei uchraas static route nemj haruulh shaardlagatai uchraas
-```
-urlpatterns = [
-    path('', include(router.urls)),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-```
-gesn butetstei bolson baigaa.
 
-#### Step 12 Uur app nemeh bol Step 5-aas Step 11 hurtel hiigeel bhd boloh baih
-
-#### Step 13 Test
+#### Step 6 Migrate
 ```sh
-python manage.py runserver
+$ python manage.py makemigrations
+$ python manage.py migrate
 ```
-Open http://localhost:8000/api/posts
+#### Step 7 db shalgah
 
-#### Next
-branch uploadmultiimage
+```
+sqlite> .tables
+    # auth_group                  django_admin_log          
+    # auth_group_permissions      django_content_type       
+    # auth_permission             django_migrations         
+    # auth_user                   django_session            
+    # auth_user_groups            post_post                 
+    # auth_user_user_permissions  post_postfile
+
+sqlite> pragma table_info('post_post');
+    # cid         name        type        notnull     dflt_value  pk        
+    # ----------  ----------  ----------  ----------  ----------  ----------
+    # 0           id          integer     1                       1         
+    # 1           title       varchar(10  1                       0         
+    # 2           content     text        1                       0         
+
+sqlite> pragma table_info('post_postfile');
+    # cid         name        type        notnull     dflt_value  pk        
+    # ----------  ----------  ----------  ----------  ----------  ----------
+    # 0           id          integer     1                       1         
+    # 1           file        varchar(10  1                       0         
+    # 2           post_id     integer     1                       0        
+```
+bolson baina.
+
+#### Step 8 Test
+1. postman-eer shalga uzlee. OK.
+
+anhaarah zuil:
+  new request -> body -> form data gej songood
+  door garch irsen deer n murnuudee nemeed yvna.
+  file-aa bolhoor file_1 file_2 file_3 gej nerleed fieldee file bolgoj songood request yvuulna.
+
+2. db orson medeelel shalgay. OK
+
+```
+sqlite> select * from post_post where id = 16;
+id          title       content   
+----------  ----------  ----------
+16          title       conte     
+
+sqlite> select * from post_postfile where post_id=16;
+id          file                 post_id   
+----------  -------------------  ----------
+9           post_files/test.zip  16        
+10          post_files/test_ySB  16        
+sqlite>
+
+```
+
+
+
+2 shirheg 1GB-iin file upload hiihed 1.54 min bolj baina.
+
+http://localhost:8000/api/posts ruu orood shalgaad uzeerei.

@@ -5,7 +5,10 @@ from django.db import models
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
-    image = models.ImageField(upload_to='post_images')
 
     def __str__(self):
         return self.title
+
+class PostFile(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='post_files', blank=True)
