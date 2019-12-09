@@ -191,3 +191,6 @@ sqlite> select * from post_postfile where post_id = 7;
 P.S: 2 shirheg 1GB-iin file upload hiihed 1.54 min bolj baina.
 
 http://localhost:8000/api/posts ruu orood shalgaad uzeerei.
+
+### Next => Many to many relation
+branch: manytomany
