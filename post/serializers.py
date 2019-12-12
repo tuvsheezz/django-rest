@@ -76,5 +76,5 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         files_data = self.context.get('view').request.FILES
         for file_data in files_data.values():
             PostFile.objects.create(post=instance,type=str(file_data).split('.')[-1],file=file_data)
-
+        instance.save()
         return instance
