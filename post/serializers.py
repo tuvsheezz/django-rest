@@ -14,16 +14,19 @@ class PostFileSerializer(serializers.HyperlinkedModelSerializer):
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     files = PostFileSerializer(source='postfile_set', many=True, read_only=True)
+    hashtags = HashtagSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
-        fields = ['id', 'url', 'title', 'content', 'files', 'hashtags', 'timestamp']
+        fields = ['id', 'url', 'title', 'content', 'files', 'hashtags', 'timestamp', 'is_deleted', 'user_id']
 
     def create(self, validated_data):
         #create post
         post = Post.objects.create(
             title=validated_data.get('title'),
-            content=validated_data.get('content')
+            content=validated_data.get('content'),
+            is_deleted=validated_data.get('is_deleted'),
+            user_id=validated_data.get('user_id')
         )
 
         #handle hashtags
@@ -46,14 +49,19 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         #Handle files
         files_data = self.context.get('view').request.FILES
         for file_data in files_data.values():
-            PostFile.objects.create(post=post,type=str(file_data).split('.')[-1],file=file_data)
-            print(file_data)
+            if str(file_data):
+                tmp_type = str(file_data)
+            else:
+                tmp_type = ".other"
+            PostFile.objects.create(post=post,type=tmp_type.split('.')[-1],file=file_data)
         return post
 
     def update(self, instance, validated_data):
         #post
         instance.title=validated_data.get('title')
         instance.content=validated_data.get('content')
+        instance.is_deleted=validated_data.get('is_deleted')
+        instance.user_id=validated_data.get('user_id')
 
         #hashtags
         hashtags_data = []
@@ -73,8 +81,27 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         instance.hashtags.set(hashtags)
 
         #files
+        ### deleting existing files
+        files_data = []
+        if "files_data" in dict(self.context.get('view').request.POST):
+            files_data = json.loads(self.context.get('view').request.POST["files_data"])
+
+        files_data_id = [d["id"] for d in files_data]
+
+        instance_files = PostFile.objects.filter(post_id=instance.id)
+
+        for inf in instance_files:
+            if inf.id not in files_data_id:
+                PostFile.objects.get(id=inf.id).delete()
+
+        ### adding new files
         files_data = self.context.get('view').request.FILES
         for file_data in files_data.values():
-            PostFile.objects.create(post=instance,type=str(file_data).split('.')[-1],file=file_data)
+            if str(file_data):
+                tmp_type = str(file_data)
+            else:
+                tmp_type = ".other"
+            PostFile.objects.create(post=instance,type=tmp_type.split('.')[-1],file=file_data)
 
+        instance.save()
         return instance

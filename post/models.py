@@ -11,8 +11,10 @@ class Hashtag(models.Model):
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
-    hashtags = models.ManyToManyField(Hashtag, blank=True)
+    hashtags = models.ManyToManyField(Hashtag, related_name="hashtags", blank=True)
+    user_id = models.IntegerField(default=1, blank=False)
     timestamp = models.DateTimeField(auto_now=True)
+    is_deleted = models.NullBooleanField(default=False)
 
     def __str__(self):
         return self.title

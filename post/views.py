@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from .serializers import PostSerializer, PostFileSerializer, HashtagSerializer
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-timestamp')
     serializer_class = PostSerializer
 
 class PostFileViewSet(viewsets.ModelViewSet):
