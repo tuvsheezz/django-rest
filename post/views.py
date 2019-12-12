@@ -1,10 +1,14 @@
 from .models import Post, PostFile, Hashtag
-from rest_framework import viewsets
+from rest_framework import pagination, viewsets
 from .serializers import PostSerializer, PostFileSerializer, HashtagSerializer
 
+class PostPagination(pagination.PageNumberPagination):
+    page_size = 10
+
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().order_by('-timestamp')
+    queryset = Post.objects.exclude(is_deleted=True).order_by('-timestamp')
     serializer_class = PostSerializer
+    pagination_class = PostPagination
 
 class PostFileViewSet(viewsets.ModelViewSet):
     queryset = PostFile.objects.all()
