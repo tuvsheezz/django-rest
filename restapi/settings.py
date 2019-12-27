@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'post',
+    'plan'
 ]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

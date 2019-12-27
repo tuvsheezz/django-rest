@@ -16,14 +16,21 @@ Including another URLconf
 
 from django.urls import include, path
 from rest_framework import routers
-from post import views
+from post import views as postViews
+from plan import views as planViews
 from django.conf import settings
 from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
-router.register(r'api/posts', views.PostViewSet)
-router.register(r'api/postfiles', views.PostFileViewSet)
-router.register(r'api/hashtags', views.HashtagViewSet)
+router.register(r'api/posts', postViews.PostViewSet)
+router.register(r'api/postfiles', postViews.PostFileViewSet)
+router.register(r'api/hashtags', postViews.HashtagViewSet)
+router.register(r'api/legalacts', planViews.LegalactViewSet)
+router.register(r'api/plans', planViews.PlanViewSet)
+router.register(r'api/plangoals', planViews.PlanGoalViewSet)
+router.register(r'api/planactions', planViews.PlanActionViewSet)
+router.register(r'api/plantasks', planViews.PlanTaskViewSet)
+router.register(r'api/planoutcomes', planViews.PlanOutcomeViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
