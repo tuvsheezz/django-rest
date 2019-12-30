@@ -169,7 +169,7 @@ class PlanSerializer(serializers.HyperlinkedModelSerializer):
                 season4=plangoal_data["season4"],
                 outcomename=plangoal_data["outcomename"]
             )
-            
+
             #handle planoutcomes
             for outcome in plangoal_data["planoutcomes"]:
                 if outcome["name"] != "":
