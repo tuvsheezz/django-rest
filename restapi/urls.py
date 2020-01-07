@@ -18,6 +18,7 @@ from django.urls import include, path
 from rest_framework import routers
 from post import views as postViews
 from plan import views as planViews
+from poll import views as pollViews
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -31,6 +32,9 @@ router.register(r'api/plangoals', planViews.PlanGoalViewSet)
 router.register(r'api/planactions', planViews.PlanActionViewSet)
 router.register(r'api/plantasks', planViews.PlanTaskViewSet)
 router.register(r'api/planoutcomes', planViews.PlanOutcomeViewSet)
+router.register(r'api/polls', pollViews.PollViewSet)
+router.register(r'api/polloptions', pollViews.PollOptionViewSet)
+router.register(r'api/polloptionvotes', pollViews.PollOptionVoteViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
