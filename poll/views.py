@@ -5,13 +5,9 @@ from rest_framework import pagination, viewsets, generics, status
 from .serializers import PollSerializer, PollOptionSerializer, PollOptionVoteSerializer
 import json
 
-class PollPagination(pagination.PageNumberPagination):
-    page_size = 10
-
 class PollViewSet(viewsets.ModelViewSet):
-    queryset = Poll.objects.all().order_by('-created_date')
+    queryset = Poll.objects.all().order_by('-deadline')
     serializer_class = PollSerializer
-    pagination_class = PollPagination
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
